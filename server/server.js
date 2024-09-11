@@ -8,7 +8,7 @@ const app = express();
 
 // กำหนด CORS ให้อนุญาตการเข้าถึงจากโดเมนที่กำหนด
 app.use(cors({
-  origin: 'https://greenhouse-it.vercel.app/', // เปลี่ยนเป็น URL ของแอปที่ deploy
+  origin: 'https://greenhouse-it.vercel.app', // เปลี่ยนเป็น URL ของแอปที่ deploy
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
@@ -82,3 +82,4 @@ app.post('/register', (req, res) => {
 app.listen(5000, () => {
   console.log('Server is running on port 5000');
 });
+
