@@ -6,9 +6,8 @@ const bcrypt = require('bcrypt');
 
 const app = express();
 
-// กำหนด CORS ให้อนุญาตการเข้าถึงจากโดเมนที่กำหนด
 app.use(cors({
-  origin: 'https://greenhouse-it.vercel.app', // เปลี่ยนเป็น URL ของแอปที่ deploy
+  origin: ['https://greenhouse-it.vercel.app', 'http://localhost:3000'], // Allow both production and development URLs
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
