@@ -2,9 +2,17 @@ const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const bcrypt = require('bcrypt');
 
 const app = express();
-app.use(cors());
+
+// กำหนด CORS ให้อนุญาตการเข้าถึงจากโดเมนที่กำหนด
+app.use(cors({
+  origin: 'https://greenhouse-it.vercel.app/', // เปลี่ยนเป็น URL ของแอปที่ deploy
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(bodyParser.json());
 
 const db = mysql.createConnection({
@@ -26,17 +34,47 @@ db.connect((err) => {
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
-  const query = 'SELECT * FROM users WHERE username = ? AND password = ?';
-  db.query(query, [username, password], (err, results) => {
+  const query = 'SELECT * FROM users WHERE username = ?';
+  db.query(query, [username], (err, results) => {
     if (err) {
-      res.json({ success: false, message: 'Error occurred during login' });
+      return res.json({ success: false, message: 'Error occurred during login' });
     }
 
     if (results.length > 0) {
-      res.json({ success: true, message: 'Login successful' });
+      const user = results[0];
+      bcrypt.compare(password, user.password, (err, isMatch) => {
+        if (err) {
+          return res.json({ success: false, message: 'Error occurred during password comparison' });
+        }
+
+        if (isMatch) {
+          res.json({ success: true, message: 'Login successful' });
+        } else {
+          res.json({ success: false, message: 'Invalid username or password' });
+        }
+      });
     } else {
       res.json({ success: false, message: 'Invalid username or password' });
     }
+  });
+});
+
+// การเข้ารหัสรหัสผ่านใหม่ ก่อนเก็บในฐานข้อมูล
+app.post('/register', (req, res) => {
+  const { username, password } = req.body;
+
+  bcrypt.hash(password, 10, (err, hashedPassword) => {
+    if (err) {
+      return res.json({ success: false, message: 'Error occurred during password hashing' });
+    }
+
+    const query = 'INSERT INTO users (username, password) VALUES (?, ?)';
+    db.query(query, [username, hashedPassword], (err, result) => {
+      if (err) {
+        return res.json({ success: false, message: 'Error occurred during registration' });
+      }
+      res.json({ success: true, message: 'Registration successful' });
+    });
   });
 });
 
