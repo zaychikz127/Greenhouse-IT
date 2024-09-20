@@ -1,17 +1,33 @@
+const fs = require('fs');
+const https = require('https');
 const express = require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
 app.use(bodyParser.json());
 
+// โหลด SSL Certificate
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/your-domain/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/your-domain/fullchain.pem', 'utf8');
+const credentials = { key: privateKey, cert: certificate };
+
+// ตั้งค่า CORS ให้อนุญาตเฉพาะจาก Vercel domain
+const corsOptions = {
+  origin: 'https://greenhouse-it.vercel.app', // frontend domain
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+// กำหนดการเชื่อมต่อกับฐานข้อมูล MySQL
 const db = mysql.createConnection({
-  host: '192.168.247.38', // หรือ IP ของ server MySQL
-  user: 'greenhouse_it_msu', // ชื่อผู้ใช้ MySQL
-  password: 'abc123greenhouse', // รหัสผ่าน MySQL
-  database: 'greenhouse_it_msu', // ชื่อฐานข้อมูล
+  host: '45.91.133.140',
+  port: 8081,
+  user: 'greenhouse-it-msu',
+  password: 'abc123greenhouse',
+  database: 'greenhouse-it-msu',
 });
 
 db.connect((err) => {
@@ -22,7 +38,7 @@ db.connect((err) => {
   console.log('Connected to MySQL database');
 });
 
-// ตรวจสอบการ login
+// กำหนด endpoint สำหรับ login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
@@ -30,6 +46,7 @@ app.post('/login', (req, res) => {
   db.query(query, [username, password], (err, results) => {
     if (err) {
       res.json({ success: false, message: 'Error occurred during login' });
+      return;
     }
 
     if (results.length > 0) {
@@ -40,7 +57,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// เริ่ม server
+// รันเซิร์ฟเวอร์ HTTP (ไม่มี SSL ตอนนี้)
 app.listen(5000, () => {
   console.log('Server is running on port 5000');
 });

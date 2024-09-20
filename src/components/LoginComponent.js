@@ -10,23 +10,28 @@ function LoginComponent() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        const response = await fetch('http://192.168.247.38:5000/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ username, password }),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            setMessage('Login successful');
-            navigate('/admin'); 
-        } else {
-            setMessage('Invalid username or password');
+    
+        try {
+            const response = await fetch(`http://45.91.133.140:8081/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+    
+            const data = await response.json();
+            if (data.success) {
+                setMessage('Login successful');
+                navigate('/admin');
+            } else {
+                setMessage('Invalid username or password');
+            }
+        } catch (error) {
+            setMessage('Error connecting to the server. Please try again later.');
         }
     };
+    
 
     return (
         <div className="login-container">
