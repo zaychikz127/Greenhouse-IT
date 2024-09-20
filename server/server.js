@@ -8,11 +8,6 @@ const cors = require('cors');
 const app = express();
 app.use(bodyParser.json());
 
-// โหลด SSL Certificate
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/your-domain/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/your-domain/fullchain.pem', 'utf8');
-const credentials = { key: privateKey, cert: certificate };
-
 // ตั้งค่า CORS ให้อนุญาตเฉพาะจาก Vercel domain
 const corsOptions = {
   origin: 'https://greenhouse-it.vercel.app', // frontend domain
